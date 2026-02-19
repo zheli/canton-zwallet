@@ -128,3 +128,60 @@ export async function submitCommand(
   )
   return response.data
 }
+
+// Transfer submit (party-signature format)
+
+export interface TransferSubmitRequest {
+  preparedTxBytes: string
+  partySignatures: Array<{
+    party: string
+    signature: string
+  }>
+}
+
+export async function submitTransfer(
+  request: TransferSubmitRequest,
+): Promise<CommandSubmitResponse> {
+  const { getLedgerApiUrl } = useNetworkStore.getState()
+  const baseUrl = getLedgerApiUrl()
+  const response = await axios.post<CommandSubmitResponse>(
+    `${baseUrl}/v1/commands/submit`,
+    request,
+    { headers: getHeaders() },
+  )
+  return response.data
+}
+
+// Transaction history
+
+export interface LedgerTransactionEvent {
+  created?: {
+    templateId?: string
+    payload?: Record<string, unknown>
+    signatories?: string[]
+  }
+  archived?: {
+    templateId?: string
+  }
+}
+
+export interface LedgerTransaction {
+  transactionId?: string
+  commandId?: string
+  effectiveAt?: string
+  events?: LedgerTransactionEvent[]
+}
+
+export interface TransactionsResponse {
+  transactions: LedgerTransaction[]
+}
+
+export async function getTransactions(partyId: string): Promise<TransactionsResponse> {
+  const { getLedgerApiUrl } = useNetworkStore.getState()
+  const baseUrl = getLedgerApiUrl()
+  const response = await axios.get<TransactionsResponse>(`${baseUrl}/v1/transactions`, {
+    headers: getHeaders(),
+    params: { parties: partyId },
+  })
+  return response.data
+}
