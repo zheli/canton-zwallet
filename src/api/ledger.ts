@@ -48,6 +48,32 @@ export async function getActiveContracts(
   return response.data
 }
 
+// Interface filter active contracts (for Splice token holdings)
+
+export interface InterfaceFilterRequest {
+  filter: {
+    interfaceFilters: Array<{
+      interfaceId: string
+      includeCreateArgumentsBlob: boolean
+    }>
+  }
+  activeAtOffset: string
+  verbose: boolean
+}
+
+export async function getActiveContractsByInterface(
+  request: InterfaceFilterRequest,
+): Promise<ActiveContractsResponse> {
+  const { getLedgerApiUrl } = useNetworkStore.getState()
+  const baseUrl = getLedgerApiUrl()
+  const response = await axios.post<ActiveContractsResponse>(
+    `${baseUrl}/v1/state/active-contracts`,
+    request,
+    { headers: getHeaders() },
+  )
+  return response.data
+}
+
 // Commands: prepare + submit
 
 export interface CommandPrepareRequest {
